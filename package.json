@@ -9,13 +9,13 @@
     "debug": "^2.0.0",
     "defaults": "^1.0.0",
     "handlebars": "^2.0.0",
-    "koa-favi": "^0.1.0",
     "lru-cache": "^2.5.0",
     "watch": "^0.11.0"
   },
   "devDependencies": {
     "case": "^1.0.3",
     "koa": "^0.11.0",
+    "koa-favi": "^0.1.0",
     "koa-logger": "^1.2.2"
   }
 }
