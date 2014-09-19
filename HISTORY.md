@@ -1,4 +1,9 @@
 
+# 0.1.2 / 09-19-2014
+ * adding unit tests (fixes #1)
+ * adding inline docs (fixes #3)
+ * a couple small bugfixes
+
 # 0.1.1 / 09-19-2014
  * correcting the spelling of path options internally (oops)
 
