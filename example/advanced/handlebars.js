@@ -17,19 +17,19 @@ inherits(Handlebars, Base);
 
 Handlebars.prototype.viewPath = function (id) {
   var o = this.options;
-  return path.resolve(o.root, o.viewPath, id, "template" + o.extension);
+  return path.resolve(o.root, o.viewsPath, id, "template" + o.extension);
 };
 
 Handlebars.prototype.layoutPath = function (id) {
   var o = this.options;
-  return path.resolve(o.root, o.layoutPath, id, "template" + o.extension);
+  return path.resolve(o.root, o.layoutsPath, id, "template" + o.extension);
 };
 
 Handlebars.prototype.partialPath = function (id) {
   var o = this.options;
   return id
-    ? path.resolve(o.root, o.partialPath, id, "template" + o.extension)
-    : path.resolve(o.root, o.partialPath);
+    ? path.resolve(o.root, o.partialsPath, id, "template" + o.extension)
+    : path.resolve(o.root, o.partialsPath);
 };
 
 Handlebars.prototype.partialId = function (file) {
