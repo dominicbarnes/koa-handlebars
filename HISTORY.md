@@ -1,4 +1,7 @@
 
+# 0.1.3 / 09-21-2014
+ * merging app.locals during rendering
+
 # 0.1.2 / 09-19-2014
  * adding unit tests (fixes #1)
  * adding inline docs (fixes #3)

@@ -1,5 +1,6 @@
 var assert = require("assert");
 var Cache = require("lru-cache");
+var co = require("co");
 var Handlebars = require("handlebars");
 var isGenerator = require("is-generator").fn;
 var noop = require("noop");
@@ -295,6 +296,66 @@ describe("Renderer#middleware()", function () {
     assert(isGenerator(r.middleware()));
   });
 
-  it("should inject renderView to the context");
-  it("should inject render to the context");
+  describe("ctx.renderView(view, locals)", function () {
+    it("should be added to the context", function *() {
+      var ctx = {};
+      co(r.middleware()).call(ctx, noop);
+      assert.equal(typeof ctx.renderView, "function");
+    });
+
+    it("should call Renderer#render(view, locals)", function *() {
+      var ctx = {};
+      co(r.middleware()).call(ctx, noop);
+
+      var view = "a";
+      var locals = { a: "A", b: "B" };
+
+      r.render = function *(v, l) {
+        assert.strictEqual(v, view);
+        assert.deepEqual(l, locals);
+        return "html";
+      };
+
+      var html = yield ctx.renderView(view, locals);
+      assert.equal(html, "html");
+    });
+
+    it("should merge ctx.locals", function *() {
+      var ctx = {
+        locals: { a: "A" }
+      };
+      co(r.middleware()).call(ctx, noop);
+
+      r.render = function *(v, l) {
+        assert.deepEqual(l, { a: "A", b: "B" });
+        return "html";
+      };
+
+      var html = yield ctx.renderView("test", { b: "B" });
+      assert.equal(html, "html");
+    });
+  });
+
+  describe("ctx.render(view, locals)", function () {
+    it("should be added to the context", function *() {
+      var ctx = {};
+      co(r.middleware()).call(ctx, noop);
+      assert.equal(typeof ctx.render, "function");
+    });
+
+    it("should call ctx.renderView(view, locals)", function *() {
+      var ctx = {};
+      co(r.middleware()).call(ctx, noop);
+
+      ctx.renderView = function *(view, locals) {
+        assert.equal(view, "test");
+        assert.deepEqual(locals, { a: "A" });
+        return "body";
+      };
+
+      yield ctx.render("test", { a: "A" });
+      assert.equal(ctx.type, "html");
+      assert.equal(ctx.body, "body");
+    });
+  });
 });
