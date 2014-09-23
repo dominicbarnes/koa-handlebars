@@ -1,4 +1,8 @@
 
+# 0.1.4 / 09-22-2014
+ * adding `_view` and `_layout` to locals during render
+ * cloning `locals` before modifying so we don't clobber the original
+
 # 0.1.3 / 09-21-2014
  * merging app.locals during rendering
 
