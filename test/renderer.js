@@ -67,7 +67,7 @@ describe("Renderer#getFile(file)", function () {
 
   it("should read the contents of the file (absolute path)", function *() {
     var layout = yield r.getFile(fixture("layouts/main.hbs"));
-    assert.equal(layout.trim(), "Layout: {{{body}}}");
+    assert.equal(layout.trim(), "Layout: {{body}}");
   });
 });
 
@@ -285,6 +285,19 @@ describe("Renderer#render(template, locals)", function () {
 
   it("should not watch partials when caching enabled");
   it("should start watching partials if caching disabled");
+
+  it("should add some meta locals (and remove 'layout' from locals)", function *() {
+    var r = new Renderer({ root: fixture() });
+    var result = yield r.render("meta", { layout: "empty" });
+    assert.equal(result.trim(), "Layout: empty\nView: meta");
+  });
+
+  it("should clone locals and not modify the original", function *() {
+    var r = new Renderer({ root: fixture() });
+    var locals = { layout: "empty" };
+    yield r.render("meta", locals);
+    assert.deepEqual(locals, { layout: "empty" });
+  });
 });
 
 describe("Renderer#middleware()", function () {
