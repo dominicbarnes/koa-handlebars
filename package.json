@@ -19,8 +19,7 @@
     "koa": "^0.11.0",
     "koa-favi": "^0.1.0",
     "koa-logger": "^1.2.2",
-    "mocha": "^1.21.4",
-    "noop": "^0.2.2"
+    "mocha": "^1.21.4"
   },
   "scripts": {
     "test": "mocha --harmony-generators"

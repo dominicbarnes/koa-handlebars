@@ -3,7 +3,7 @@ var Cache = require("lru-cache");
 var co = require("co");
 var Handlebars = require("handlebars");
 var isGenerator = require("is-generator").fn;
-var noop = require("noop");
+var noop = function*(){};
 var path = require("path");
 var Renderer = require("../lib/renderer.js");
 
