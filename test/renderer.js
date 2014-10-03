@@ -3,7 +3,7 @@ var Cache = require("lru-cache");
 var co = require("co");
 var Handlebars = require("handlebars");
 var isGenerator = require("is-generator").fn;
-var noop = require("noop");
+var noop = require("nop");
 var path = require("path");
 var Renderer = require("../lib/renderer.js");
 
@@ -346,6 +346,42 @@ describe("Renderer#middleware()", function () {
 
       var html = yield ctx.renderView("test", { b: "B" });
       assert.equal(html, "html");
+    });
+
+    it("should throw an error", function *() {
+      var ctx = {
+        throw: function (code, msg) {
+          var e = new Error(msg);
+          e.code = code;
+          throw e;
+        }
+      };
+      co(r.middleware()).call(ctx, noop);
+
+      try {
+        var html = yield ctx.renderView("does-not-exist");
+        assert(!html);
+        assert(false);
+      } catch (err) {
+        assert(err instanceof Error);
+        assert.equal(err.message.indexOf("unable to render view: does-not-exist because"), 0);
+      }
+    });
+
+    it("should call upon the beforeRender config", function *() {
+      var ctx = {};
+
+      var r = new Renderer({
+        root: fixture(),
+        beforeRender: function () {
+          this.foo = "bar";
+        }
+      });
+
+      co(r.middleware()).call(ctx, noop);
+
+      yield ctx.renderView("simple");
+      assert.equal(ctx.foo, "bar");
     });
   });
 
