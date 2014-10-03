@@ -1,4 +1,8 @@
 
+# 0.2.0 / 10-02-2014
+ * adding custom error message
+ * adding `options.beforeRender` fn to make last-minute adjustments before rendering
+
 # 0.1.4 / 09-22-2014
  * adding `_view` and `_layout` to locals during render
  * cloning `locals` before modifying so we don't clobber the original

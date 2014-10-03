@@ -1,6 +1,6 @@
 {
   "name": "koa-handlebars",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "dependencies": {
     "co": "^3.1.0",
     "co-fs": "^1.2.0",
@@ -16,13 +16,14 @@
     "case": "^1.0.3",
     "co-mocha": "^1.0.1",
     "is-generator": "^1.0.0",
+    "istanbul-harmony": "^0.3.0",
     "koa": "^0.11.0",
     "koa-favi": "^0.1.0",
     "koa-logger": "^1.2.2",
     "mocha": "^1.21.4",
-    "noop": "^0.2.2"
+    "nop": "0.0.0"
   },
   "scripts": {
-    "test": "mocha --harmony-generators"
+    "test": "node --harmony-generators node_modules/.bin/istanbul test node_modules/.bin/_mocha"
   }
 }
