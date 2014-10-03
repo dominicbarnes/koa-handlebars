@@ -138,6 +138,9 @@ debug output via `DEBUG=koa-handlebars` in the terminal.
  * `helpers`: a hash of helpers to load handlebars with (you can always add
    more after init)
  * `cache`: enables/disables the view cache (default: `true`)
+ * `beforeRender()`: function that is called using the koa context before
+   merging locals and rendering. (useful to make last-minute adjustments before
+   rendering)
 
 ## Advanced Usage
 
