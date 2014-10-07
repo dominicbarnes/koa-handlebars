@@ -67,7 +67,7 @@ describe("Renderer#getFile(file)", function () {
 
   it("should read the contents of the file (absolute path)", function *() {
     var layout = yield r.getFile(fixture("layouts/main.hbs"));
-    assert.equal(layout.trim(), "Layout: {{body}}");
+    assert.equal(layout.trim(), "Layout: {{@body}}");
   });
 });
 
@@ -76,7 +76,7 @@ describe("Renderer#compileTemplate(file)", function () {
     var r = new Renderer();
     var layout = yield r.compileTemplate(fixture("layouts/main.hbs"));
     assert.equal(typeof layout, "function");
-    assert.equal(layout({ body: "a" }).trim(), "Layout: a");
+    assert.equal(layout({}, { data: { body: "a" } }).trim(), "Layout: a");
   });
 });
 
@@ -147,7 +147,7 @@ describe("Renderer#getLayout(id)", function () {
 
   it("should retrieve a layout function", function *() {
     var layout = yield r.getLayout("main");
-    assert.equal(layout({ body: "body" }).trim(), "Layout: body");
+    assert.equal(layout({}, { data: { body: "body" } }).trim(), "Layout: body");
   });
 });
 
