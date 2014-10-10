@@ -9,7 +9,7 @@ app.use(require("koa-logger")());
 app.use(handlebars({
   cache: app.env !== "development",
   defaultLayout: "main",
-  viewPath: "pages",
+  viewsPath: "pages",
   helpers: require("./lib/helpers.js")
 }).middleware());
 

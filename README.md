@@ -39,7 +39,7 @@ app.listen(3000);
     <title>{{title}}</title>
   </head>
   <body>
-    {{{body}}}
+    {{{@body}}}
   </body>
 </html>
 ```
@@ -66,7 +66,7 @@ Hello, {{name}}!
 
 The entry point for rendering is known as a view. The view usually contains the
 content specific to a single page. It has access to all loaded partials, helpers
-and is injected into the `{{{body}}}` of the corresponding layout. (if there is
+and is injected into the `{{{@body}}}` of the corresponding layout. (if there is
 one)
 
 The simplest usage is to have a flat `views/` directory that contains `.hbs`
@@ -78,7 +78,7 @@ In "development mode", views are not cached.
 ### Layouts
 
 Layouts are the content that is shared between many views. Like views, it has
-access to all loaded partials and helpers. The `{{{body}}}` local is set as the
+access to all loaded partials and helpers. The `{{{@body}}}` local is set as the
 content of the corresponding view.
 
 The simplest usage is to have a flat `layouts/` directory that contains `.hbs`
@@ -124,6 +124,22 @@ In addition, this library uses
 [visionmedia/debug](https://github.com/visionmedia/debug), so you can enable
 debug output via `DEBUG=koa-handlebars` in the terminal.
 
+### Special Variables
+
+When rendering templates, koa-handlebars will add 3 special private variables
+to your templates:
+
+ * `@body`: in layouts, this is the contents of the rendererd view
+ * `@view`: the name of the view that is being rendered
+ * `@layout`: the name of the layout that is being rendered
+ * `@koa`: the koa `ctx` of the current request
+
+You can add more variables of your own via the `beforeRender` option. (see
+configuration options section for more details)
+
+Generally speaking, avoid injecting data directly into `locals` from middleware,
+instead focus on adding things to `options.data`.
+
 ### Configuration Options
  * `root`: the root directory to operate with (defaults to `process.cwd()`)
  * `viewsPath`: the path (relative to `root`) to find views (defaults to
@@ -138,9 +154,9 @@ debug output via `DEBUG=koa-handlebars` in the terminal.
  * `helpers`: a hash of helpers to load handlebars with (you can always add
    more after init)
  * `cache`: enables/disables the view cache (default: `true`)
- * `beforeRender()`: function that is called using the koa context before
-   merging locals and rendering. (useful to make last-minute adjustments before
-   rendering)
+ * `beforeRender(locals, options)`: function that is called using the koa
+   context and available locals + options before rendering. (useful to make
+   application-level customizations)
 
 ## Advanced Usage
 

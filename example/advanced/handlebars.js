@@ -25,10 +25,10 @@ Handlebars.prototype.layoutPath = function (id) {
   return path.resolve(o.root, o.layoutsPath, id, "template" + o.extension);
 };
 
-Handlebars.prototype.partialPath = function (id) {
+Handlebars.prototype.partialPath = function (name) {
   var o = this.options;
-  return id
-    ? path.resolve(o.root, o.partialsPath, id, "template" + o.extension)
+  return name
+    ? path.resolve(o.root, o.partialsPath, this.partialId(name), "template" + o.extension)
     : path.resolve(o.root, o.partialsPath);
 };
 

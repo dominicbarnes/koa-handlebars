@@ -1,6 +1,10 @@
 {
   "name": "koa-handlebars",
   "version": "0.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dominicbarnes/koa-handlebars.git"
+  },
   "dependencies": {
     "co": "^3.1.0",
     "co-fs": "^1.2.0",
@@ -9,8 +13,7 @@
     "debug": "^2.0.0",
     "extend": "^1.3.0",
     "handlebars": "^2.0.0",
-    "lru-cache": "^2.5.0",
-    "watch": "^0.11.0"
+    "lru-cache": "^2.5.0"
   },
   "devDependencies": {
     "case": "^1.0.3",
