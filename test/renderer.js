@@ -40,10 +40,16 @@ describe("Renderer(options)", function () {
     assert.strictEqual(r.handlebars, hbs);
   });
 
-  it("should register helpers if provided", function () {
+  it("should register global helpers if provided", function () {
     var helpers = { abc: noop };
     var r = new Renderer({ helpers: helpers });
     assert.strictEqual(r.handlebars.helpers.abc, noop);
+  });
+
+  it("should register global partials if provided", function () {
+    var partials = { abc: noop };
+    var r = new Renderer({ partials: partials });
+    assert.strictEqual(r.handlebars.partials.abc, noop);
   });
 
   it("should set up a cache when enabled", function () {
@@ -55,11 +61,6 @@ describe("Renderer(options)", function () {
     var r = new Renderer({ cache: false });
     assert(!r.cache);
   });
-
-  it("should init the partialsLoaded flag", function () {
-    var r = new Renderer();
-    assert(!r.partialsLoaded);
-  });
 });
 
 describe("Renderer#getFile(file)", function () {
@@ -67,7 +68,7 @@ describe("Renderer#getFile(file)", function () {
 
   it("should read the contents of the file (absolute path)", function *() {
     var layout = yield r.getFile(fixture("layouts/main.hbs"));
-    assert.equal(layout.trim(), "Layout: {{body}}");
+    assert.equal(layout.trim(), "Layout: {{@body}}");
   });
 });
 
@@ -76,16 +77,31 @@ describe("Renderer#compileTemplate(file)", function () {
     var r = new Renderer();
     var layout = yield r.compileTemplate(fixture("layouts/main.hbs"));
     assert.equal(typeof layout, "function");
-    assert.equal(layout({ body: "a" }).trim(), "Layout: a");
+    assert.equal(layout({}, { data: { body: "a" } }).trim(), "Layout: a");
   });
 });
 
 describe("Renderer#getTemplate(file)", function () {
   it("should cache the template fn when caching is enabled", function *() {
     var r = new Renderer({ root: fixture() });
-    var key = "layouts/main.hbs";
-    var layout = yield r.getTemplate(fixture(key));
+    var rel = "layouts/main.hbs";
+    var path = fixture(rel);
+    var key = "template:" + path;
+
+    var layout = yield r.getTemplate(path);
     assert.strictEqual(r.cache.get(key), layout);
+    var layoutCached = yield r.getTemplate(path);
+    assert.strictEqual(layoutCached, layout);
+  });
+
+  it("should bypass the cache when disabled", function *() {
+    var r = new Renderer({ root: fixture(), cache: false });
+    var rel = "layouts/main.hbs";
+    var key = "template:" + rel;
+    var path = fixture(rel);
+
+    var layout = yield r.getTemplate(path);
+    assert(!r.cache);
   });
 });
 
@@ -101,7 +117,7 @@ describe("Renderer#viewPath(id)", function () {
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      viewsPath: "pages",
+      viewsDir: "pages",
       extension: ".handlebars"
     });
 
@@ -132,7 +148,7 @@ describe("Renderer#layoutPath(id)", function () {
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      layoutsPath: "containers", // lol, not sure what else people call layouts
+      layoutsDir: "containers", // lol, not sure what else people call layouts
       extension: ".handlebars"
     });
 
@@ -147,7 +163,7 @@ describe("Renderer#getLayout(id)", function () {
 
   it("should retrieve a layout function", function *() {
     var layout = yield r.getLayout("main");
-    assert.equal(layout({ body: "body" }).trim(), "Layout: body");
+    assert.equal(layout({}, { data: { body: "body" } }).trim(), "Layout: body");
   });
 });
 
@@ -166,20 +182,6 @@ describe("Renderer#partial(name, fn)", function () {
   });
 });
 
-describe("Renderer#partialPath(file)", function () {
-  var r = new Renderer({
-    root: fixture()
-  });
-
-  it("should return the partials dir", function () {
-    assert.equal(r.partialPath(), fixture("partials"));
-  });
-
-  it("should combine the path correctly", function () {
-    assert.equal(r.partialPath("hello.hbs"), fixture("partials/hello.hbs"));
-  });
-});
-
 describe("Renderer#partialId(file)", function () {
   var r = new Renderer({
     root: fixture()
@@ -188,16 +190,36 @@ describe("Renderer#partialId(file)", function () {
   it("should strip the extension", function () {
     assert.equal(r.partialId("hello.hbs"), "hello");
   });
+
+  it("should camel-case", function () {
+    assert.equal(r.partialId("nav/main.hbs"), "navMain");
+  });
 });
 
-describe("Renderer#getPartial(file)", function () {
-  var r = new Renderer({
-    root: fixture()
+describe("Renderer#findPartials()", function () {
+  it("should return an array of files", function *() {
+    var r = new Renderer({ root: fixture() });
+
+    var partials = yield r.findPartials();
+    assert.deepEqual(partials, [ "hello.hbs", "nav/main.hbs" ]);
   });
 
-  it("should register the partial at the give path", function *() {
-    yield r.getPartial("hello.hbs");
-    assert(r.handlebars.partials.hello);
+  it("should retrieve the listing from the cache", function *() {
+    var r = new Renderer({ root: fixture() });
+
+    var partials = yield r.findPartials();
+    assert.equal(partials.length, 2);
+    var partialsCached = yield r.findPartials();
+    assert(r.cache.peek("partials:list:" + fixture("partials")));
+    assert.deepEqual(partials, partialsCached);
+  });
+
+  it("should bypass the cache when disabled", function *() {
+    var r = new Renderer({ root: fixture(), cache: false });
+
+    var partials = yield r.findPartials();
+    assert.equal(partials.length, 2);
+    assert(!r.cache);
   });
 });
 
@@ -207,23 +229,10 @@ describe("Renderer#getPartials()", function () {
   });
 
   it("should register all the partials in the partials dir", function *() {
-    yield r.getPartials();
-    assert(r.handlebars.partials.hello);
+    var partials = yield r.getPartials();
+    assert.equal(typeof partials.hello, 'function');
   });
 });
-
-describe("Renderer#removePartial(file)", function () {
-  it("should unregister the partial matching that file", function *() {
-    var r = new Renderer({ root: fixture() });
-    yield r.getPartials();
-    r.removePartial("hello.hbs");
-    assert(!r.handlebars.partials.hello);
-  });
-});
-
-// TODO
-// describe("Renderer#watchPartials()");
-// describe("Renderer#unwatchPartials()");
 
 describe("Renderer#helper(name, fn)", function () {
   var r = new Renderer();
@@ -240,7 +249,7 @@ describe("Renderer#helper(name, fn)", function () {
   });
 });
 
-describe("Renderer#render(template, locals)", function () {
+describe("Renderer#render(template, locals, options)", function () {
   it("should render a plain view", function *() {
     var r = new Renderer({ root: fixture() });
     var result = yield r.render("simple", { name: "World" });
@@ -277,15 +286,6 @@ describe("Renderer#render(template, locals)", function () {
     assert.equal(result.trim(), "Layout: Hello, World!");
   });
 
-  it("should set the partialsLoaded flag", function *() {
-    var r = new Renderer({ root: fixture() });
-    var result = yield r.render("simple");
-    assert(r.partialsLoaded);
-  });
-
-  it("should not watch partials when caching enabled");
-  it("should start watching partials if caching disabled");
-
   it("should add some meta locals (and remove 'layout' from locals)", function *() {
     var r = new Renderer({ root: fixture() });
     var result = yield r.render("meta", { layout: "empty" });
@@ -309,27 +309,30 @@ describe("Renderer#middleware()", function () {
     assert(isGenerator(r.middleware()));
   });
 
-  describe("ctx.renderView(view, locals)", function () {
+  describe("ctx.renderView(view, locals, options)", function () {
     it("should be added to the context", function *() {
       var ctx = {};
       co(r.middleware()).call(ctx, noop);
       assert.equal(typeof ctx.renderView, "function");
     });
 
-    it("should call Renderer#render(view, locals)", function *() {
+    it("should call Renderer#render(...)", function *() {
       var ctx = {};
       co(r.middleware()).call(ctx, noop);
 
       var view = "a";
       var locals = { a: "A", b: "B" };
+      var options = { data: { hello: "world" } };
 
-      r.render = function *(v, l) {
+      r.render = function *(v, l, o) {
         assert.strictEqual(v, view);
         assert.deepEqual(l, locals);
+        assert.strictEqual(o.data.koa, ctx);
+        assert.equal(o.data.hello, "world");
         return "html";
       };
 
-      var html = yield ctx.renderView(view, locals);
+      var html = yield ctx.renderView(view, locals, options);
       assert.equal(html, "html");
     });
 
@@ -383,16 +386,29 @@ describe("Renderer#middleware()", function () {
       yield ctx.renderView("simple");
       assert.equal(ctx.foo, "bar");
     });
+
+    it("should inject the koa context into the template data", function *() {
+      var ctx = {};
+      co(r.middleware()).call(ctx, noop);
+
+      r.render = function *(v, l, o) {
+        assert.strictEqual(o.data.koa, ctx);
+        return "html";
+      };
+
+      var html = yield ctx.renderView("a", {}, {});
+      assert.equal(html, "html");
+    });
   });
 
-  describe("ctx.render(view, locals)", function () {
+  describe("ctx.render(view, locals, options)", function () {
     it("should be added to the context", function *() {
       var ctx = {};
       co(r.middleware()).call(ctx, noop);
       assert.equal(typeof ctx.render, "function");
     });
 
-    it("should call ctx.renderView(view, locals)", function *() {
+    it("should call ctx.renderView(...)", function *() {
       var ctx = {};
       co(r.middleware()).call(ctx, noop);
 

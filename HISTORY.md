@@ -1,4 +1,12 @@
 
+# 0.3.0 / 10-10-2014
+ * massive internal overhaul
+ * many more configuration options, no longer encouraging custom `Renderer` (although it's still available)
+ * no longer injecting data to `locals` (using handlebars' `options.data` instead)
+ * default `options.partialId` now camel-cases by default
+ * 100% test coverage :)
+ * probably more... just read current readme
+
 # 0.2.0 / 10-02-2014
  * adding custom error message
  * adding `options.beforeRender` fn to make last-minute adjustments before rendering
