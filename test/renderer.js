@@ -40,10 +40,16 @@ describe("Renderer(options)", function () {
     assert.strictEqual(r.handlebars, hbs);
   });
 
-  it("should register helpers if provided", function () {
+  it("should register global helpers if provided", function () {
     var helpers = { abc: noop };
     var r = new Renderer({ helpers: helpers });
     assert.strictEqual(r.handlebars.helpers.abc, noop);
+  });
+
+  it("should register global partials if provided", function () {
+    var partials = { abc: noop };
+    var r = new Renderer({ partials: partials });
+    assert.strictEqual(r.handlebars.partials.abc, noop);
   });
 
   it("should set up a cache when enabled", function () {
@@ -111,7 +117,7 @@ describe("Renderer#viewPath(id)", function () {
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      viewsPath: "pages",
+      viewsDir: "pages",
       extension: ".handlebars"
     });
 
@@ -142,7 +148,7 @@ describe("Renderer#layoutPath(id)", function () {
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      layoutsPath: "containers", // lol, not sure what else people call layouts
+      layoutsDir: "containers", // lol, not sure what else people call layouts
       extension: ".handlebars"
     });
 
@@ -176,20 +182,6 @@ describe("Renderer#partial(name, fn)", function () {
   });
 });
 
-describe("Renderer#partialPath(file)", function () {
-  var r = new Renderer({
-    root: fixture()
-  });
-
-  it("should return the partials dir", function () {
-    assert.equal(r.partialPath(), fixture("partials"));
-  });
-
-  it("should combine the path correctly", function () {
-    assert.equal(r.partialPath("hello.hbs"), fixture("partials/hello.hbs"));
-  });
-});
-
 describe("Renderer#partialId(file)", function () {
   var r = new Renderer({
     root: fixture()
@@ -214,7 +206,8 @@ describe("Renderer#findPartials()", function () {
     var partials = yield r.findPartials();
     assert.deepEqual(partials, [ "hello.hbs" ]);
     var partialsCached = yield r.findPartials();
-    assert.strictEqual(partials, partialsCached);
+    assert(r.cache.peek("partials:list:" + fixture("partials")));
+    assert.deepEqual(partials, partialsCached);
   });
 
   it("should bypass the cache when disabled", function *() {
@@ -222,17 +215,7 @@ describe("Renderer#findPartials()", function () {
 
     var partials = yield r.findPartials();
     assert.deepEqual(partials, [ "hello.hbs" ]);
-    var partials2 = yield r.findPartials();
-    assert.notStrictEqual(partials, partials2);
-  });
-});
-
-describe("Renderer#getPartial(file)", function () {
-  var r = new Renderer({ root: fixture() });
-
-  it("should return the partial at the given path", function *() {
-    var partial = yield r.getPartial("hello.hbs");
-    assert.equal(typeof partial, 'function');
+    assert(!r.cache);
   });
 });
 
