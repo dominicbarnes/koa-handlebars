@@ -92,28 +92,24 @@ In "development mode", layouts are not cached.
 [Partials](https://github.com/wycats/handlebars.js/#partials) are sub-templates
 that you can use to render smaller bits within layouts/views.
 
-Due to how Handlebars deals with partials, they must all be registered before
-they can be used. This is unfortunate, particularly during development, as you
-would need to restart your server each time you change a partial. (unlike views
-and layouts, which are easy to deal with) Thankfully, koa-handlebars alleviates
-this problem for you.
+There are 2 main types of partials. First, global partials are registered
+during init. (see `options.partials`) These will not be dynamically updated,
+not even during "development mode". (thus, you will need to restart your server
+when these globals change)
 
-On the first `render` call, the available partials are loaded and compiled. In
-"development mode", the partials directory is monitored for changes, keeping
-handlebars aware of all changes to partials. (including updates, additions and
-removals)
+Secondly, partials residing in the directory specified by `options.partialsDir`
+will be dynamically loaded on each render call. When caching is enabled, that
+overhead is reduced substantially, and further optimization will be done in the
+future.
 
 ### Helpers
 
 [Helpers](http://handlebarsjs.com/#helpers) are functions that any of your
 templates can call upon.
 
-The primary way to register helpers is during init with the `helpers` option.
-This is a hash of functions (where each key is the helper id that will be used
-in templates)
-
-Currently, these are not very automated, so any changes here will require your
-server to be restarted.
+Currently, helpers can only be defined globally and must be declared during
+initialization. (see `options.helpers`) This requires a server restart after
+any changes, but this will be improved upon in the future.
 
 ### Development
 
@@ -138,28 +134,104 @@ You can add more variables of your own via the `beforeRender` option. (see
 configuration options section for more details)
 
 Generally speaking, avoid injecting data directly into `locals` from middleware,
-instead focus on adding things to `options.data`.
+instead focus on adding things to `options.data` or using the koa context to
+grab data from there. (eg: `{{@koa.request.length}}`)
 
-### Configuration Options
- * `root`: the root directory to operate with (defaults to `process.cwd()`)
- * `viewsPath`: the path (relative to `root`) to find views (defaults to
-   `views/`)
- * `partialsPath`: the path (relative to `root`) to find partials (defaults
-   to `partials/`)
- * `layoutsPath`: the path (relative to `root`) to find layouts (defaults to
-   `layouts/`)
- * `extension`: the file extension to use for your templates (default: `.hbs`)
- * `defaultLayout`: if you are using layouts, enter your main one here
-   (otherwise each call to `render` will need to specify `layout` manually)
- * `helpers`: a hash of helpers to load handlebars with (you can always add
-   more after init)
- * `cache`: enables/disables the view cache (default: `true`)
- * `beforeRender(locals, options)`: function that is called using the koa
-   context and available locals + options before rendering. (useful to make
-   application-level customizations)
+## Configuration Options
 
-## Advanced Usage
+### root
 
-If you have an app structure that's different than the norm, you are able to
-accomodate quite a bit by creating a custom instance of the `Renderer`. See
-the advanced example for real code demonstrating what I mean.
+The base directory to use when resolving paths.
+
+**Default:** `process.cwd()`
+
+### cache
+
+Enables or disables the view cache. This is basically the flag for "development
+mode".
+
+**Default:**: `true`
+
+```js
+app.use(handlebars({
+  cache: app.env !== "development"
+}));
+```
+
+### extension
+
+The file extension used by templates. Your files must be named consistently
+throughout the project at this time.
+
+**Default:** `".hbs"`
+
+### viewsDir
+
+The location of your view templates (relative to `root`)
+
+**Default:** "views"
+
+### viewPath(id)
+
+Translates an `id` passed to `render()` and returns an absolute path to the
+template. For example: `"home" => "/path/to/root/views/home.hbs"`
+
+This function is run with the renderer as it's context (ie: `this`) so you can
+access `this.options` within your custom functions.
+
+### defaultLayout
+
+If you are using layouts, then this can be used to bypass requiring each call
+to `render()` to specify a layout manually. Otherwise, leaving it empty will
+not render a layout at all unless otherwise specified.
+
+### layoutsDir
+
+The location of your layout templates (relative to `root`)
+
+**Default:** "layouts"
+
+### layoutPath(id)
+
+Translates an `id` passed to `render()` and returns an absolute path to the
+template. For example: `"main" => "/path/to/root/layouts/main.hbs"`
+
+This function is run with the renderer as it's context (ie: `this`) so you can
+access `this.options` within your custom functions.
+
+### partialsDir
+
+The location of your non-global partial templates (relative to `root`)
+
+**Default:** "partials"
+
+### partialId(file)
+
+This function is a little backwards compared to layouts and views, but it takes
+a path for a partial template file. (relative to `partialsDir`) and converts it
+into a handlebars-friendly identifier.
+
+For example: `"navigation.hbs" => "navigation"`
+
+By default, it will camel-case your partial if it is in a nested directory.
+
+For example: `"nav/main.hbs" => "navMain"`
+
+### helpers
+
+Allows you to define global helpers during initialization, this should be a
+shallow object where each key is a helper name and the value is a function.
+
+### partials
+
+Allows you to define global partials during initialization, this should be a
+shallow object where each key is a partial name and the value is a function.
+
+### beforeRender(locals, options)
+
+This function is around to give you a hook in before rendering is performed
+to make last-minute modifications to either the view `locals` or the handlebars
+`options` (see [docs](http://handlebarsjs.com/execution.html) for more info)
+
+*Generally-speaking*, you should avoid modifying `locals`. If you have further
+data you want your templates to access, use `options.data` instead.
