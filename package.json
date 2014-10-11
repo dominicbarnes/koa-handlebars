@@ -17,7 +17,6 @@
     "to-camel-case": "^0.2.1"
   },
   "devDependencies": {
-    "case": "^1.0.3",
     "co-mocha": "^1.0.1",
     "is-generator": "^1.0.0",
     "istanbul-harmony": "^0.3.0",

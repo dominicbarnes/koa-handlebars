@@ -1,5 +1,5 @@
 // dependencies
-var Case = require("case");
+var camel = require("to-camel-case");
 var koa = require("koa");
 var handlebars = require("../../index.js");
 var path = require("path");
@@ -19,29 +19,28 @@ app.use(handlebars({
   // setting up a default layout
   defaultLayout: "main",
 
-  // loading some global helpers
-  helpers: require("./lib/helpers.js"),
-
   // custom views dir
   viewsDir: "pages",
 
   // expects pages/:name/template.hbs
-  viewPath: function *(id) {
+  viewPath: function (id) {
     var o = this.options;
     return path.resolve(o.root, o.viewsDir, id, "template" + o.extension);
   },
 
   // expects layouts/:name/template.hbs
-  layoutPath: function *(id) {
+  layoutPath: function (id) {
     var o = this.options;
     return path.resolve(o.root, o.layoutsDir, id, "template" + o.extension);
   },
 
   // expects partials/:name/template.hbs
-  partialId: function *(name) {
-    var id = file.split(path.sep).slice(0, -1).join("-");
-    return Case.camel(id);
-  }
+  partialId: function (file) {
+    return camel(file.split(path.sep).slice(0, -1).join("-"));
+  },
+
+  // loading some global helpers
+  helpers: require("./lib/helpers.js")
 }));
 
 // render example
