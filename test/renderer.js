@@ -190,6 +190,10 @@ describe("Renderer#partialId(file)", function () {
   it("should strip the extension", function () {
     assert.equal(r.partialId("hello.hbs"), "hello");
   });
+
+  it("should camel-case", function () {
+    assert.equal(r.partialId("nav/main.hbs"), "navMain");
+  });
 });
 
 describe("Renderer#findPartials()", function () {
@@ -197,14 +201,14 @@ describe("Renderer#findPartials()", function () {
     var r = new Renderer({ root: fixture() });
 
     var partials = yield r.findPartials();
-    assert.deepEqual(partials, [ "hello.hbs" ]);
+    assert.deepEqual(partials, [ "hello.hbs", "nav/main.hbs" ]);
   });
 
   it("should retrieve the listing from the cache", function *() {
     var r = new Renderer({ root: fixture() });
 
     var partials = yield r.findPartials();
-    assert.deepEqual(partials, [ "hello.hbs" ]);
+    assert.equal(partials.length, 2);
     var partialsCached = yield r.findPartials();
     assert(r.cache.peek("partials:list:" + fixture("partials")));
     assert.deepEqual(partials, partialsCached);
@@ -214,7 +218,7 @@ describe("Renderer#findPartials()", function () {
     var r = new Renderer({ root: fixture(), cache: false });
 
     var partials = yield r.findPartials();
-    assert.deepEqual(partials, [ "hello.hbs" ]);
+    assert.equal(partials.length, 2);
     assert(!r.cache);
   });
 });
