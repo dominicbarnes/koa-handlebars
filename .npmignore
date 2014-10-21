@@ -1,0 +1,6 @@
+coverage/
+example/
+test/
+.gitignore
+HISTORY.md
+README.md

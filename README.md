@@ -130,8 +130,9 @@ to your templates:
  * `@layout`: the name of the layout that is being rendered
  * `@koa`: the koa `ctx` of the current request
 
-You can add more variables of your own via the `beforeRender` option. (see
-configuration options section for more details)
+You can add more variables of your own via the `data` option or more dynamically
+with the `beforeRender` function. (see configuration options section for more
+details)
 
 Generally speaking, avoid injecting data directly into `locals` from middleware,
 instead focus on adding things to `options.data` or using the koa context to
@@ -157,6 +158,11 @@ app.use(handlebars({
   cache: app.env !== "development"
 }));
 ```
+
+### data
+
+Adds additional private data (alongside `@view`, `@layout` and `@koa`) to the
+[handlebars render options](http://handlebarsjs.com/execution.html).
 
 ### extension
 
