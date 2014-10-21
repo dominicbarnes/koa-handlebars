@@ -1,4 +1,7 @@
 
+# 0.3.1 / 10-21-2014
+ * added `options.data` for adding private render data
+
 # 0.3.0 / 10-10-2014
  * massive internal overhaul
  * many more configuration options, no longer encouraging custom `Renderer` (although it's still available)
