@@ -1,4 +1,7 @@
 
+# 0.4.1 / 12-18-2014
+ * simplified pre-rendering by just using `options.body` instead of changing the signature of `.render()`
+
 # 0.4.0 / 12-18-2014
  * added ability to pre-render views external to koa-handlebars
 
