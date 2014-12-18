@@ -301,12 +301,19 @@ describe("Renderer#render(template, locals, options)", function () {
 
   it("should allow sending a pre-rendered body", function *() {
     var r = new Renderer({ root: fixture() });
-
-    var body = yield r.render({
-      body: "Hello World!"
-    });
+    var options = { body: "Hello World!" };
+    var body = yield r.render('meta', null, options);
 
     assert.equal(body, "Hello World!");
+  });
+
+  it('should still render layouts with a pre-rendered body', function *() {
+    var r = new Renderer({ root: fixture() });
+    var locals = { layout: "main" };
+    var options = { body: "Hello World!" };
+    var body = yield r.render('meta', locals, options);
+
+    assert.equal(body, "Layout: Hello World!\n");
   });
 });
 
