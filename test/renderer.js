@@ -298,6 +298,16 @@ describe("Renderer#render(template, locals, options)", function () {
     yield r.render("meta", locals);
     assert.deepEqual(locals, { layout: "empty" });
   });
+
+  it("should allow sending a pre-rendered body", function *() {
+    var r = new Renderer({ root: fixture() });
+
+    var body = yield r.render({
+      body: "Hello World!"
+    });
+
+    assert.equal(body, "Hello World!");
+  });
 });
 
 describe("Renderer#middleware()", function () {
