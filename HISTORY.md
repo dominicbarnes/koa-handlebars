@@ -1,4 +1,7 @@
 
+# 0.4.0 / 12-18-2014
+ * added ability to pre-render views external to koa-handlebars
+
 # 0.3.1 / 10-21-2014
  * added `options.data` for adding private render data
 
