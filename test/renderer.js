@@ -61,6 +61,11 @@ describe("Renderer(options)", function () {
     var r = new Renderer({ cache: false });
     assert(!r.cache);
   });
+
+  it("should convert extension to an array", function () {
+    var r = new Renderer({ extension: ".handlebars" });
+    assert.deepEqual(r.options.extension, [ ".handlebars" ]);
+  });
 });
 
 describe("Renderer#getFile(file)", function () {
@@ -103,6 +108,24 @@ describe("Renderer#getTemplate(file)", function () {
     var layout = yield r.getTemplate(path);
     assert(!r.cache);
   });
+
+  it("should find the right file even with multiple extensions", function *() {
+    var r = new Renderer({ root: fixture(), extension: [ ".hbs", ".md" ] });
+    var template = yield r.getTemplate(fixture("views/markdown"));
+    assert.equal(template(), "# This is Markdown!\n");
+  });
+
+  it("should throw an error when a template is not found", function *() {
+    var r = new Renderer({ root: fixture() });
+    var file = fixture("views/markdown");
+
+    try {
+      yield r.getTemplate(file);
+      throw new Error("the template should not be found");
+    } catch (err) {
+      assert.equal(err.message, "Could not find template file: " + file);
+    }
+  });
 });
 
 describe("Renderer#viewPath(id)", function () {
@@ -111,17 +134,27 @@ describe("Renderer#viewPath(id)", function () {
       root: fixture()
     });
 
-    assert.equal(r.viewPath("home"), fixture("views/home.hbs"));
+    assert.equal(r.viewPath("home"), fixture("views/home"));
   });
 
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      viewsDir: "pages",
-      extension: ".handlebars"
+      viewsDir: "pages"
     });
 
-    assert.equal(r.viewPath("home"), fixture("pages/home.handlebars"));
+    assert.equal(r.viewPath("home"), fixture("pages/home"));
+  });
+
+  it("should allow using a custom absolute path", function () {
+    var r = new Renderer({
+      root: fixture(),
+      viewPath: function (id) {
+        return path.join("/this/is/absolute", id);
+      }
+    })
+
+    assert.equal(r.viewPath("home"), "/this/is/absolute/home");
   });
 });
 
@@ -142,17 +175,27 @@ describe("Renderer#layoutPath(id)", function () {
       root: fixture()
     });
 
-    assert.equal(r.layoutPath("main"), fixture("layouts/main.hbs"));
+    assert.equal(r.layoutPath("main"), fixture("layouts/main"));
   });
 
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      layoutsDir: "containers", // lol, not sure what else people call layouts
-      extension: ".handlebars"
+      layoutsDir: "containers" // lol, not sure what else people call layouts
     });
 
-    assert.equal(r.layoutPath("main"), fixture("containers/main.handlebars"));
+    assert.equal(r.layoutPath("main"), fixture("containers/main"));
+  });
+
+  it("should allow using a custom absolute path", function () {
+    var r = new Renderer({
+      root: fixture(),
+      layoutPath: function (id) {
+        return path.join("/this/is/absolute", id);
+      }
+    })
+
+    assert.equal(r.layoutPath("main"), "/this/is/absolute/main");
   });
 });
 
