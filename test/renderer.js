@@ -61,11 +61,6 @@ describe("Renderer(options)", function () {
     var r = new Renderer({ cache: false });
     assert(!r.cache);
   });
-
-  it("should convert extension to an array", function () {
-    var r = new Renderer({ extension: ".handlebars" });
-    assert.deepEqual(r.options.extension, [ ".handlebars" ]);
-  });
 });
 
 describe("Renderer#getFile(file)", function () {
@@ -245,6 +240,13 @@ describe("Renderer#findPartials()", function () {
 
     var partials = yield r.findPartials();
     assert.deepEqual(partials, [ "hello.hbs", "nav/main.hbs" ]);
+  });
+
+  it("should work properly with and without '.' prefix in extensions", function *() {
+    var r = new Renderer({ root: fixture(), extension: [ "hbs", ".md" ] });
+
+    var partials = yield r.findPartials();
+    assert.deepEqual(partials, [ "hello.hbs", "markdown.md", "nav/main.hbs" ]);
   });
 
   it("should retrieve the listing from the cache", function *() {
@@ -429,22 +431,6 @@ describe("Renderer#middleware()", function () {
         assert(err instanceof Error);
         assert.equal(err.message.indexOf("unable to render view: does-not-exist because"), 0);
       }
-    });
-
-    it("should call upon the beforeRender config", function *() {
-      var ctx = {};
-
-      var r = new Renderer({
-        root: fixture(),
-        beforeRender: function () {
-          this.foo = "bar";
-        }
-      });
-
-      co(r.middleware()).call(ctx, noop);
-
-      yield ctx.renderView("simple");
-      assert.equal(ctx.foo, "bar");
     });
 
     it("should inject the koa context into the template data", function *() {
