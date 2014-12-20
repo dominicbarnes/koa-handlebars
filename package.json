@@ -6,7 +6,6 @@
     "url": "git@github.com:dominicbarnes/koa-handlebars.git"
   },
   "dependencies": {
-    "co": "^3.1.0",
     "co-fs": "^1.2.0",
     "colors": "^0.6.2",
     "debug": "^2.0.0",
@@ -20,6 +19,7 @@
     "to-camel-case": "^0.2.1"
   },
   "devDependencies": {
+    "co": "^3.1.0",
     "co-mocha": "^1.0.1",
     "is-generator": "^1.0.0",
     "istanbul-harmony": "^0.3.0",
