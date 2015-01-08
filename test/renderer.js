@@ -68,16 +68,23 @@ describe("Renderer#getFile(file)", function () {
 
   it("should read the contents of the file (absolute path)", function *() {
     var layout = yield r.getFile(fixture("layouts/main.hbs"));
-    assert.equal(layout.trim(), "Layout: {{@body}}");
+    assert.deepEqual(layout, {
+      body: "Layout: {{@body}}\n",
+      attributes: {}
+    });
   });
 });
 
 describe("Renderer#compileTemplate(file)", function () {
-  it("should compile the file into a template (absolute path)", function *() {
+  it("should return a decorated object for the template", function *() {
     var r = new Renderer();
     var layout = yield r.compileTemplate(fixture("layouts/main.hbs"));
-    assert.equal(typeof layout, "function");
-    assert.equal(layout({}, { data: { body: "a" } }).trim(), "Layout: a");
+
+    assert.equal(typeof layout, "object");
+    assert.equal(layout.body.trim(), "Layout: {{@body}}");
+    assert.deepEqual(layout.attributes, {});
+    assert.equal(typeof layout.fn, "function");
+    assert.equal(typeof layout.render, "function");
   });
 });
 
@@ -103,6 +110,24 @@ describe("Renderer#getTemplate(file)", function () {
     var layout = yield r.getTemplate(path);
     assert(!r.cache);
   });
+
+  it("should find the right file even with multiple extensions", function *() {
+    var r = new Renderer({ root: fixture(), extension: [ ".hbs", ".md" ] });
+    var template = yield r.getTemplate(fixture("views/markdown"));
+    assert.equal(template.render(), "# This is Markdown!\n");
+  });
+
+  it("should throw an error when a template is not found", function *() {
+    var r = new Renderer({ root: fixture() });
+    var file = fixture("views/markdown");
+
+    try {
+      yield r.getTemplate(file);
+      throw new Error("the template should not be found");
+    } catch (err) {
+      assert.equal(err.message, "Could not find template file: " + file);
+    }
+  });
 });
 
 describe("Renderer#viewPath(id)", function () {
@@ -111,17 +136,27 @@ describe("Renderer#viewPath(id)", function () {
       root: fixture()
     });
 
-    assert.equal(r.viewPath("home"), fixture("views/home.hbs"));
+    assert.equal(r.viewPath("home"), fixture("views/home"));
   });
 
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      viewsDir: "pages",
-      extension: ".handlebars"
+      viewsDir: "pages"
     });
 
-    assert.equal(r.viewPath("home"), fixture("pages/home.handlebars"));
+    assert.equal(r.viewPath("home"), fixture("pages/home"));
+  });
+
+  it("should allow using a custom absolute path", function () {
+    var r = new Renderer({
+      root: fixture(),
+      viewPath: function (id) {
+        return path.join("/this/is/absolute", id);
+      }
+    })
+
+    assert.equal(r.viewPath("home"), "/this/is/absolute/home");
   });
 });
 
@@ -132,7 +167,7 @@ describe("Renderer#getView(id)", function () {
 
   it("should retrieve a view function", function *() {
     var view = yield r.getView("simple");
-    assert.equal(view({ name: "World" }).trim(), "Hello, World!");
+    assert.equal(view.render({ name: "World" }).trim(), "Hello, World!");
   });
 });
 
@@ -142,17 +177,27 @@ describe("Renderer#layoutPath(id)", function () {
       root: fixture()
     });
 
-    assert.equal(r.layoutPath("main"), fixture("layouts/main.hbs"));
+    assert.equal(r.layoutPath("main"), fixture("layouts/main"));
   });
 
   it("should correctly handle options", function () {
     var r = new Renderer({
       root: fixture(),
-      layoutsDir: "containers", // lol, not sure what else people call layouts
-      extension: ".handlebars"
+      layoutsDir: "containers" // lol, not sure what else people call layouts
     });
 
-    assert.equal(r.layoutPath("main"), fixture("containers/main.handlebars"));
+    assert.equal(r.layoutPath("main"), fixture("containers/main"));
+  });
+
+  it("should allow using a custom absolute path", function () {
+    var r = new Renderer({
+      root: fixture(),
+      layoutPath: function (id) {
+        return path.join("/this/is/absolute", id);
+      }
+    })
+
+    assert.equal(r.layoutPath("main"), "/this/is/absolute/main");
   });
 });
 
@@ -163,7 +208,7 @@ describe("Renderer#getLayout(id)", function () {
 
   it("should retrieve a layout function", function *() {
     var layout = yield r.getLayout("main");
-    assert.equal(layout({}, { data: { body: "body" } }).trim(), "Layout: body");
+    assert.equal(layout.render({}, { data: { body: "body" } }).trim(), "Layout: body");
   });
 });
 
@@ -202,6 +247,13 @@ describe("Renderer#findPartials()", function () {
 
     var partials = yield r.findPartials();
     assert.deepEqual(partials, [ "hello.hbs", "nav/main.hbs" ]);
+  });
+
+  it("should work properly with and without '.' prefix in extensions", function *() {
+    var r = new Renderer({ root: fixture(), extension: [ "hbs", ".md" ] });
+
+    var partials = yield r.findPartials();
+    assert.deepEqual(partials, [ "hello.hbs", "markdown.md", "nav/main.hbs" ]);
   });
 
   it("should retrieve the listing from the cache", function *() {
@@ -307,13 +359,20 @@ describe("Renderer#render(template, locals, options)", function () {
     assert.equal(body, "Hello World!");
   });
 
-  it('should still render layouts with a pre-rendered body', function *() {
+  it("should still render layouts with a pre-rendered body", function *() {
     var r = new Renderer({ root: fixture() });
     var locals = { layout: "main" };
     var options = { body: "Hello World!" };
     var body = yield r.render('meta', locals, options);
 
     assert.equal(body, "Layout: Hello World!\n");
+  });
+
+  it("should extract YAML front-matter from views", function *() {
+    var r = new Renderer({ root: fixture() });
+    var body = yield r.render("front-matter");
+
+    assert.equal(body.trim(), "Hello, World!");
   });
 });
 
@@ -386,22 +445,6 @@ describe("Renderer#middleware()", function () {
         assert(err instanceof Error);
         assert.equal(err.message.indexOf("unable to render view: does-not-exist because"), 0);
       }
-    });
-
-    it("should call upon the beforeRender config", function *() {
-      var ctx = {};
-
-      var r = new Renderer({
-        root: fixture(),
-        beforeRender: function () {
-          this.foo = "bar";
-        }
-      });
-
-      co(r.middleware()).call(ctx, noop);
-
-      yield ctx.renderView("simple");
-      assert.equal(ctx.foo, "bar");
     });
 
     it("should inject the koa context into the template data", function *() {

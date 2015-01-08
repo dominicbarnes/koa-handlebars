@@ -166,10 +166,14 @@ Adds additional private data (alongside `@view`, `@layout` and `@koa`) to the
 
 ### extension
 
-The file extension used by templates. Your files must be named consistently
-throughout the project at this time.
+The extension(s) that your template files can use. Any files not using the
+given extensions will be ignored.
 
-**Default:** `".hbs"`
+**Default:** `"hbs"`
+
+If you have multiple extensions, you simply use an array.
+
+For example: `[ "hbs", "handlebars", "tpl" ]`
 
 ### viewsDir
 
@@ -179,11 +183,14 @@ The location of your view templates (relative to `root`)
 
 ### viewPath(id)
 
-Translates an `id` passed to `render()` and returns an absolute path to the
-template. For example: `"home" => "/path/to/root/views/home.hbs"`
+Translates the given `id` into a path to resolve the template file. (the file
+extension is not required) If the returned path is relative, it will be assumed
+as relative to `viewsDir`.
+
+By default, this simply returns the given `id`.
 
 This function is run with the renderer as it's context (ie: `this`) so you can
-access `this.options` within your custom functions.
+access `this.options` for advanced usage.
 
 ### defaultLayout
 
@@ -199,11 +206,14 @@ The location of your layout templates (relative to `root`)
 
 ### layoutPath(id)
 
-Translates an `id` passed to `render()` and returns an absolute path to the
-template. For example: `"main" => "/path/to/root/layouts/main.hbs"`
+Translates the given `id` into a path to resolve the template file. (the file
+extension is not required) If the returned path is relative, it will be assumed
+as relative to `layoutsDir`.
+
+By default, this simply returns the given `id`.
 
 This function is run with the renderer as it's context (ie: `this`) so you can
-access `this.options` within your custom functions.
+access `this.options` for advanced usage.
 
 ### partialsDir
 
@@ -219,7 +229,7 @@ into a handlebars-friendly identifier.
 
 For example: `"navigation.hbs" => "navigation"`
 
-By default, it will camel-case your partial if it is in a nested directory.
+By default, it will strip the extension and camel-case the remaining string.
 
 For example: `"nav/main.hbs" => "navMain"`
 
@@ -232,12 +242,3 @@ shallow object where each key is a helper name and the value is a function.
 
 Allows you to define global partials during initialization, this should be a
 shallow object where each key is a partial name and the value is a function.
-
-### beforeRender(locals, options)
-
-This function is around to give you a hook in before rendering is performed
-to make last-minute modifications to either the view `locals` or the handlebars
-`options` (see [docs](http://handlebarsjs.com/execution.html) for more info)
-
-*Generally-speaking*, you should avoid modifying `locals`. If you have further
-data you want your templates to access, use `options.data` instead.
