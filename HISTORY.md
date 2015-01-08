@@ -1,4 +1,7 @@
 
+# 0.5.0 / 1-8-2015
+ * adding support for injecting locals as yaml front-matter on views and layouts
+
 # 0.4.1 / 12-18-2014
  * simplified pre-rendering by just using `options.body` instead of changing the signature of `.render()`
 
