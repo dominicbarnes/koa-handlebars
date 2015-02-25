@@ -1,4 +1,7 @@
 
+# 0.5.1 / 2-25-2015
+ * upgrading to `handlebars@3`
+
 # 0.5.0 / 1-8-2015
  * adding support for injecting locals as yaml front-matter on views and layouts
 
