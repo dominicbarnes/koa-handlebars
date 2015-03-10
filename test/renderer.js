@@ -412,18 +412,19 @@ describe("Renderer#middleware()", function () {
       assert.equal(html, "html");
     });
 
-    it("should merge ctx.locals", function *() {
+    it("should merge ctx.locals and ctx.state", function *() {
       var ctx = {
-        locals: { a: "A" }
+        locals: { a: "A" },
+        state: { b: "B" }
       };
       co(r.middleware()).call(ctx, noop);
 
       r.render = function *(v, l) {
-        assert.deepEqual(l, { a: "A", b: "B" });
+        assert.deepEqual(l, { a: "A", b: "B", z: "Z" });
         return "html";
       };
 
-      var html = yield ctx.renderView("test", { b: "B" });
+      var html = yield ctx.renderView("test", { z: "Z" });
       assert.equal(html, "html");
     });
 
