@@ -1,4 +1,7 @@
 
+# 0.5.2 / 3-10-2015
+ * merging in `ctx.state` during rendering as well
+
 # 0.5.1 / 2-25-2015
  * upgrading to `handlebars@3`
 
