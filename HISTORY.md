@@ -1,4 +1,7 @@
 
+# 0.5.3 / 4-1-2015
+ * fixing nasty data clobbering bug caused by not using clean objects
+
 # 0.5.2 / 3-10-2015
  * merging in `ctx.state` during rendering as well
 
