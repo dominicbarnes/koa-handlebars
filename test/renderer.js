@@ -338,6 +338,18 @@ describe("Renderer#render(template, locals, options)", function () {
     assert.equal(result.trim(), "Layout: Hello, World!");
   });
 
+  it("should allow overwriting options.defaultView with null (no layout)", function *() {
+    var r = new Renderer({
+      root: fixture(),
+      defaultLayout: "does-not-exist"
+    });
+    var result = yield r.render("simple", {
+      layout: null,
+      name: "World"
+    });
+    assert.equal(result.trim(), "Hello, World!");
+  });
+
   it("should add some meta locals (and remove 'layout' from locals)", function *() {
     var r = new Renderer({ root: fixture() });
     var result = yield r.render("meta", { layout: "empty" });
