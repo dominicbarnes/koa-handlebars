@@ -1,4 +1,7 @@
 
+# 0.5.4 / 6-9-2015
+ * Added ability to set local layout to null to render view w/out layout (when defaultLayout is set).
+
 # 0.5.3 / 4-1-2015
  * fixing nasty data clobbering bug caused by not using clean objects
 
