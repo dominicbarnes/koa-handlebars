@@ -386,6 +386,27 @@ describe("Renderer#render(template, locals, options)", function () {
 
     assert.equal(body.trim(), "Hello, World!");
   });
+
+  it("should ensure that YAML data is accessible to all templates", function *() {
+    var r = new Renderer({ root: fixture() });
+    var body = yield r.render("front-matter", { layout: "front-matter" });
+
+    assert.equal(body.trim(), "Layout, World!"); // no {{{@body}}}
+  });
+
+  it("should allow YAML in layout", function *() {
+    var r = new Renderer({ root: fixture() });
+    var body = yield r.render("simple", { layout: "front-matter-data" });
+
+    assert.equal(body.trim(), "Layout, Test!"); // no {{{@body}}}
+  });
+
+  it("should allow layout YAML to be overridden by view YAML", function *() {
+    var r = new Renderer({ root: fixture() });
+    var body = yield r.render("front-matter", { layout: "front-matter-data" });
+
+    assert.equal(body.trim(), "Layout, World!"); // no {{{@body}}}
+  });
 });
 
 describe("Renderer#middleware()", function () {
