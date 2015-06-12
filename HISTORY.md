@@ -1,4 +1,7 @@
 
+# 0.5.5 / 6-12-2015
+ * allowing front-matter data to be used in layout
+
 # 0.5.4 / 6-9-2015
  * Added ability to set local layout to null to render view w/out layout (when defaultLayout is set).
 
