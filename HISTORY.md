@@ -1,4 +1,9 @@
 
+0.5.7 / 2015-07-22
+==================
+
+  * fixing errors caused by missing partials dir
+
 0.5.5 / 2015-06-12
 ==================
 
