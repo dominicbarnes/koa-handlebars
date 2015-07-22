@@ -1,4 +1,9 @@
 
+0.5.6 / 2015-07-22
+==================
+
+  * bug: fixing an error caused by a missing partials dir
+
 # 0.5.5 / 6-12-2015
  * allowing front-matter data to be used in layout
 
