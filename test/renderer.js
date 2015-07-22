@@ -276,13 +276,15 @@ describe("Renderer#findPartials()", function () {
 });
 
 describe("Renderer#getPartials()", function () {
-  var r = new Renderer({
-    root: fixture()
-  });
-
   it("should register all the partials in the partials dir", function *() {
+    var r = new Renderer({ root: fixture() });
     var partials = yield r.getPartials();
     assert.equal(typeof partials.hello, 'function');
+  });
+
+  it("should not break w/o a partials dir", function *() {
+    var r = new Renderer({ root: fixture(), partialsDir: 'does-not-exist' });
+    yield r.getPartials();
   });
 });
 
