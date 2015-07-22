@@ -1,9 +1,4 @@
 
-0.5.6 / 2015-07-22
-==================
-
-  * bug: fixing an error caused by a missing partials dir
-
 0.5.5 / 2015-06-12
 ==================
 
