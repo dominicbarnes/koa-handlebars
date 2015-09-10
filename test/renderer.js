@@ -289,8 +289,8 @@ describe("Renderer#getPartials()", function () {
 });
 
 describe("Renderer#helper(name, fn)", function () {
-  var r = new Renderer();
   var helpers = require("./fixtures/helpers.js");
+  var r = new Renderer();
 
   it("should register a single helper", function () {
     r.helper("upper", helpers.upper);
@@ -300,6 +300,13 @@ describe("Renderer#helper(name, fn)", function () {
   it("should register multiple helpers", function () {
     r.helper(helpers);
     assert.strictEqual(r.handlebars.helpers.upper, helpers.upper);
+  });
+
+  it("should pass handlebars instance to helper", function *() {
+      var r = new Renderer({ root: fixture(), helpers: helpers });
+      var context = { story: {url: "test-url", text: "story..."}};
+      var result = yield r.render("with-helper", context);
+      assert.equal(result.trim(), "Hello, World!");
   });
 });
 
