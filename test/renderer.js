@@ -43,7 +43,7 @@ describe("Renderer(options)", function () {
   it("should register global helpers if provided", function () {
     var helpers = { abc: noop };
     var r = new Renderer({ helpers: helpers });
-    assert.strictEqual(r.handlebars.helpers.abc, noop);
+    assert.ok(r.handlebars.helpers.abc);
   });
 
   it("should register global partials if provided", function () {
@@ -294,19 +294,19 @@ describe("Renderer#helper(name, fn)", function () {
 
   it("should register a single helper", function () {
     r.helper("upper", helpers.upper);
-    assert.strictEqual(r.handlebars.helpers.upper, helpers.upper);
+    assert.ok(r.handlebars.helpers.upper);
   });
 
   it("should register multiple helpers", function () {
     r.helper(helpers);
-    assert.strictEqual(r.handlebars.helpers.upper, helpers.upper);
+    assert.ok(r.handlebars.helpers.upper);
   });
 
   it("should pass handlebars instance to helper", function *() {
       var r = new Renderer({ root: fixture(), helpers: helpers });
       var context = { story: {url: "test-url", text: "story..."}};
       var result = yield r.render("with-helper", context);
-      assert.equal(result.trim(), "Hello, World!");
+      assert.equal(result.trim(), "Helper: <a href='test-url'>story...</a>");
   });
 });
 
