@@ -105,7 +105,19 @@ future.
 ### Helpers
 
 [Helpers](http://handlebarsjs.com/#helpers) are functions that any of your
-templates can call upon.
+templates can call upon. The handlebars instance is accessible using
+`this.handlebars`.
+
+```js
+exports.link = function(object) {
+  var url = this.handlebars.escapeExpression(object.url),
+      text = this.handlebars.escapeExpression(object.text);
+
+  return new this.handlebars.SafeString(
+    "<a href='" + url + "'>" + text + "</a>"
+  );
+};
+```
 
 Currently, helpers can only be defined globally and must be declared during
 initialization. (see `options.helpers`) This requires a server restart after

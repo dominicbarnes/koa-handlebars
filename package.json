@@ -1,6 +1,6 @@
 {
   "name": "koa-handlebars",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "repository": {
     "type": "git",
     "url": "git@github.com:dominicbarnes/koa-handlebars.git"
