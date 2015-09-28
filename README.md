@@ -242,3 +242,30 @@ shallow object where each key is a helper name and the value is a function.
 
 Allows you to define global partials during initialization, this should be a
 shallow object where each key is a partial name and the value is a function.
+
+### handlebars
+
+Allows you to pass a custom handlebars instance, which you may want to do in
+some edge cases. For example, if you plan on using Handlebars.SafeString in
+your block helpers, you'll need a handle on the same instance of handlebars
+that the middleware is using. For example:
+
+```
+// app.js
+var handlebars = require('handlebars');
+var hbsKoa = require('koa-handlebars');
+
+var app = koa();
+app.use(hbsKoa({
+  handlebars: handlebars
+}));
+
+// helpers.js
+
+// Same instance, because node modules are cached
+var Handlebars = require('handlebars');
+
+module.exports.myHelper = function(input, options) {
+  return new Handlebars.SafeString('<div class="some-html">' + input + '</div>');
+};
+```
