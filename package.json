@@ -10,7 +10,7 @@
     "co-fs": "^1.2.0",
     "debug": "^2.0.0",
     "extend": "^1.3.0",
-    "find-alternate-file": "^1.0.4",
+    "find-alternate-file": "^1.0.5",
     "front-matter": "^0.2.0",
     "handlebars": "^3.0.0",
     "lru-cache": "^2.5.0",
