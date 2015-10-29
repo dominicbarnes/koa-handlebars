@@ -243,6 +243,24 @@ shallow object where each key is a helper name and the value is a function.
 Allows you to define global partials during initialization, this should be a
 shallow object where each key is a partial name and the value is a function.
 
+### compileOptions
+
+Handlebars supports a number of optional flags for the template
+[compile function](http://handlebarsjs.com/reference.html#base-compile). Set
+the compileOptions object to pass these through from the middleware.
+
+For example:
+
+```js
+handlebars({
+  // ... Other middleware options
+  compileOptions: {
+    preventIndent: true
+  }
+})
+
+```
+
 ### handlebars
 
 Allows you to pass a custom handlebars instance, which you may want to do in
