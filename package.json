@@ -32,7 +32,7 @@
     "opener": "^1.4.0"
   },
   "scripts": {
-    "test": "node --harmony-generators node_modules/.bin/istanbul test node_modules/.bin/_mocha",
+    "test": "node node_modules/.bin/istanbul test node_modules/.bin/_mocha",
     "coverage": "npm test && opener coverage/lcov-report/index.html"
   }
 }
