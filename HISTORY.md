@@ -1,4 +1,9 @@
 
+1.0.0 / 2016-10-31
+==================
+
+  * Update some dependencies to fix 4 known security vulnerabilities (#26)
+
 0.5.7 / 2015-07-22
 ==================
 
