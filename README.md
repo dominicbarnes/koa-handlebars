@@ -10,19 +10,21 @@ and writes the generated view as the response. There is also
 `renderView(view, locals)`, which yields the raw string. This allows you to
 modify the response further.
 
+`koa-handlebars` v2 works with the Koa v2 async/await signature.
+
 **app.js**
 ```js
-var koa = require("koa");
+var Koa = require("koa");
 var handlebars = require("koa-handlebars");
 
-var app = koa();
+var app = new Koa();
 
 app.use(handlebars({
   defaultLayout: "main"
 }));
 
-app.use(function *() {
-  yield this.render("index", {
+app.use(async function() {
+  await this.render("index", {
     title: "Test Page",
     name: "World"
   });

@@ -5,7 +5,7 @@ var handlebars = require("../../index.js");
 var path = require("path");
 
 // locals
-var app = koa();
+var app = new Koa();
 
 // middleware
 app.use(require("koa-favi")());
@@ -44,8 +44,8 @@ app.use(handlebars({
 }));
 
 // render example
-app.use(function *() {
-  yield this.render("test", {
+app.use(async function() {
+  await this.render("test", {
     user: { name: "World" }
   });
 });
