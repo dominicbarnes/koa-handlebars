@@ -2,6 +2,9 @@
 
 > A koa middleware for using handlebars templates
 
+**NOTE:** the `master` branch (ie: `v1.x` on npm) works with `koa@1.x`. See
+the `v2` branch (ie: `v2.x` on npm) for `koa@2.x` support.
+
 ## Usage
 
 This middleware adds 2 methods to the koa context object. The primary one is
