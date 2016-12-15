@@ -1,7 +1,7 @@
-var koa = require("koa");
+var Koa = require("koa");
 var handlebars = require("../../index.js");
 
-var app = koa();
+var app = new Koa();
 
 app.use(require("koa-favi")());
 app.use(require("koa-logger")());
@@ -11,8 +11,8 @@ app.use(handlebars({
   defaultLayout: "main"
 }));
 
-app.use(function *() {
-  yield this.render("test", {
+app.use(async function() {
+  await this.render("test", {
     user: { name: "World" }
   });
 });
