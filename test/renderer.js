@@ -412,8 +412,12 @@ describe("Renderer#render(template, locals, options)", function () {
 });
 
 describe("Renderer#middleware()", function () {
-  var r = new Renderer({
-    root: fixture()
+  var r;
+
+  beforeEach(function() {
+    r = new Renderer({
+      root: fixture()
+    });
   });
 
   it("should return a generator function", function () {
@@ -462,6 +466,81 @@ describe("Renderer#middleware()", function () {
       var html = yield ctx.renderView("test", { z: "Z" });
       assert.equal(html, "html");
     });
+
+    it("should compile partial strings attached to ctx.state.partials", function *() {
+      var ctx = {
+          state: {
+              partials: {
+                  test: "{{testValue}}"
+              }
+          }
+      };
+      co(r.middleware()).call(ctx, noop);
+      var html = yield ctx.renderView('tester', { testValue: 'works!'});
+      assert(html);
+      assert.equal(html.trim(), 'Tester works!');
+    });
+
+    it("should compile partial strings attached to ctx.locals.partials",
+        function *() {
+      var ctx = {
+        locals: {
+          partials: {
+            test: "{{testValue}}"
+          }
+        }
+      };
+      co(r.middleware()).call(ctx, noop);
+      var html = yield ctx.renderView('tester', { testValue: 'works!'});
+      assert(html);
+      assert.equal(html.trim(), 'Tester works!');
+    });
+
+    it("should accept pre-compiled partial functions on ctx.state/locals",
+      function *() {
+        var ctx = {
+          state: {
+            partials: {
+              test: Handlebars.compile("{{testValue}}")
+            }
+          },
+          locals: {
+            partials: {
+              other: Handlebars.compile("{{otherValue}}")
+            }
+          }
+        };
+        co(r.middleware()).call(ctx, noop);
+        var html = yield ctx.renderView("combined",
+          { testValue: "This", otherValue: "works!"});
+        assert(html);
+        assert.equal(html.trim(), 'This works!');
+      });
+
+    it("should include helper attached to ctx.state.helpers or ctx.locals.helpers",
+      function *() {
+        var ctx = {
+          state: {
+            helpers: {
+              uppercase: function(val) {
+                return val.toUpperCase();
+              }
+            }
+          },
+          locals: {
+            helpers: {
+              appendFortyTwo: function(val) {
+                return val + ' 42';
+              }
+            }
+          }
+        };
+        co(r.middleware()).call(ctx, noop);
+        var html = yield ctx.renderView("helpers",
+          { first: "shouting now", second: "meaning of life is"});
+        assert(html);
+        assert.equal(html.trim(), "SHOUTING NOW meaning of life is 42");
+      });
 
     it("should throw an error", function *() {
       var ctx = {

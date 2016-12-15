@@ -95,7 +95,7 @@ In "development mode", layouts are not cached.
 [Partials](https://github.com/wycats/handlebars.js/#partials) are sub-templates
 that you can use to render smaller bits within layouts/views.
 
-There are 2 main types of partials. First, global partials are registered
+There are three main types of partials. First, global partials are registered
 during init. (see `options.partials`) These will not be dynamically updated,
 not even during "development mode". (thus, you will need to restart your server
 when these globals change)
@@ -105,14 +105,48 @@ will be dynamically loaded on each render call. When caching is enabled, that
 overhead is reduced substantially, and further optimization will be done in the
 future.
 
+Lastly, if you attach a local partials map to `ctx.state` or `ctx.locals`, these
+will be dynamically added to the partial set for the render call. This is useful
+if you want to make partials available from upstream middleware. For example:
+
+```js
+app.use(function*(next) {
+  this.state.partials = {
+    myPartial: '<div>{{someValue}}</div>',
+    myCompilePartial: handlebars.compile('<div>{{otherStuff}}</div>')
+  };
+  yield next;
+});
+
+app.use(koaHandlebars());
+```
+
+Note that you can pass in either uncompiled inline partial strings, or compiled
+partial functions.
+
 ### Helpers
 
 [Helpers](http://handlebarsjs.com/#helpers) are functions that any of your
 templates can call upon.
 
-Currently, helpers can only be defined globally and must be declared during
+Helpers can only be defined globally and must be declared during
 initialization. (see `options.helpers`) This requires a server restart after
-any changes, but this will be improved upon in the future.
+any changes.
+
+You can also attach helpers to `ctx.state` or `ctx.locals` in an upstream
+middleware, and they'll be made available to the render calls. For example:
+
+```js
+app.use(function*(next) {
+  this.state.helpers = {
+    uppercase: function(val) {
+      return val.toUpperCase();
+    }
+  }
+});
+
+app.use(koaHandlebars());
+```
 
 ### Development
 
