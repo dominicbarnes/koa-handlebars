@@ -409,6 +409,24 @@ describe("Renderer#render(template, locals, options)", function () {
 
     assert.equal(body.trim(), "Layout, World!"); // no {{{@body}}}
   });
+
+  it("should respect compileOptions", function *() {
+    var compileOptions = {
+        noEscape: true
+    };
+    var code = `<div class="what">Normally I'd be escaped</div>`;
+    // Before
+    var r = new Renderer({ root: fixture() });
+    var body = yield r.render("code", { code: code, layout: false });
+    assert.equal(body.trim(),
+        "&lt;div class=&quot;what&quot;&gt;Normally " +
+        "I&#x27;d be escaped&lt;/div&gt;");
+
+    // After
+    r = new Renderer({ root: fixture(), compileOptions: compileOptions });
+    body = yield r.render("code", { code: code, layout: false });
+    assert.equal(body.trim(), code); // Output not escaped.
+  });
 });
 
 describe("Renderer#middleware()", function () {
